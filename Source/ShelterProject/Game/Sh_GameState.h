@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright KroNus Games 2025
 
 #pragma once
 
@@ -20,6 +20,9 @@ class SHELTERPROJECT_API ASh_GameState : public AGameStateBase
 {
 	GENERATED_BODY()
 
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	int32 CurrentWave;
 

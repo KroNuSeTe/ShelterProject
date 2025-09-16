@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright KroNus Games 2025
 
 #pragma once
 
