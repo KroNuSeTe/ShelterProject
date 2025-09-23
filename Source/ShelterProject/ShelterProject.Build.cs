@@ -20,10 +20,14 @@ public class ShelterProject : ModuleRules
 			"GameplayStateTreeModule",
 			"Niagara",
 			"UMG",
-			"Slate"
+			"Slate",
+			"GameplayAbilities"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] {
+			"GameplayTags",
+			"GameplayTasks"
+		});
 
 		PublicIncludePaths.AddRange(new string[] {
 			"ShelterProject",
