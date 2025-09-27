@@ -3,25 +3,20 @@
 #include "Public/AbilitySystem/ShAbilitySystemComponent.h"
 
 
-UShAbilitySystemComponent::UShAbilitySystemComponent()
+void UShAbilitySystemComponent::AbilityActorInfoSet()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-
+	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &UShAbilitySystemComponent::EffectApplied);
 }
 
-
-void UShAbilitySystemComponent::BeginPlay()
+void UShAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
+                                              const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveGameplayEffectHandle)
 {
-	Super::BeginPlay();
-
-	
+	FGameplayTagContainer TagContainer;
+	EffectSpec.GetAllAssetTags(TagContainer);
+	for (const FGameplayTag& Tag : TagContainer)
+	{
+		//TODO: Broadcast the tag to the Widget Controller
+		const FString Msg = FString::Printf(TEXT("GE Tag: %s"), *Tag.ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Blue, Msg);
+	}
 }
-
-
-void UShAbilitySystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                              FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-}
-

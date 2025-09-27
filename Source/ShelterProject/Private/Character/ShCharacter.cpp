@@ -4,6 +4,7 @@
 #include "Public/Character/ShCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/ShAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Public/Player/Sh_PlayerController.h"
 #include "Public/Player/Sh_PlayerState.h"
@@ -49,6 +50,7 @@ void AShCharacter::InitAbilityActorInfo()
 	ASh_PlayerState* ShPlayerState = GetPlayerState<ASh_PlayerState>();
 	check(ShPlayerState);
 	ShPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(ShPlayerState, this);
+	Cast<UShAbilitySystemComponent>(ShPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 	AbilitySystemComponent = ShPlayerState->GetAbilitySystemComponent();
 	AttributeSet = ShPlayerState->GetAttributeSet();
 

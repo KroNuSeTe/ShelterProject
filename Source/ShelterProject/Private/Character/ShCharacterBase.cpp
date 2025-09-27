@@ -8,7 +8,7 @@ AShCharacterBase::AShCharacterBase()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
-	Weapon->SetupAttachment(GetMesh(), FName("HandGrip_R"));
+	Weapon->SetupAttachment(GetMesh(), FName("Weapon_R"));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -20,6 +20,11 @@ UAbilitySystemComponent* AShCharacterBase::GetAbilitySystemComponent() const
 void AShCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+	
+}
+
+void AShCharacterBase::InitAbilityActorInfo()
+{
 	
 }
 

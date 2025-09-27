@@ -12,6 +12,41 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+USTRUCT()
+struct FEffectProperties
+{
+	GENERATED_BODY()
+	
+	FEffectProperties() {}
+	
+	FGameplayEffectContextHandle EffectContextHandle;
+	
+	UPROPERTY()
+	UAbilitySystemComponent* SourceASC = nullptr;
+
+	UPROPERTY()
+	UAbilitySystemComponent* TargetASC = nullptr;
+
+	UPROPERTY()
+	AActor* SourceAvatarActor = nullptr;
+
+	UPROPERTY()
+	AActor* TargetAvatarActor = nullptr;
+
+	UPROPERTY()
+	AController* SourceController = nullptr;
+
+	UPROPERTY()
+	AController* TargetController = nullptr;
+
+	UPROPERTY()
+	ACharacter* SourceCharacter = nullptr;
+
+	UPROPERTY()
+	ACharacter* TargetCharacter = nullptr;
+	
+};
+
 /**
  * 
  */
@@ -23,6 +58,8 @@ class SHELTERPROJECT_API UShAttributeSet : public UAttributeSet
 public:
 	UShAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Survival Attributes")
 	FGameplayAttributeData Health;
@@ -32,11 +69,11 @@ public:
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxHealth);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Survival Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Stamina, Category = "Survival Attributes")
 	FGameplayAttributeData Stamina;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, Stamina);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Survival Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxStamina, Category = "Survival Attributes")
 	FGameplayAttributeData MaxStamina;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxStamina);
 
@@ -129,6 +166,14 @@ public:
 	FGameplayAttributeData MaxMachineAffinity;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxMachineAffinity);
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MachineAffinity, Category = "Skill Attributes")
+	FGameplayAttributeData Luck;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, Luck);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMachineAffinity, Category = "Skill Attributes")
+	FGameplayAttributeData MaxLuck;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxLuck);
+
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
 
@@ -207,4 +252,14 @@ public:
 	UFUNCTION()
 	void OnRep_MaxMachineAffinity(const FGameplayAttributeData& OldMaxMachineAffinity) const;
 
+	UFUNCTION()
+	void OnRep_Luck(const FGameplayAttributeData& OldLuck) const;
+
+	UFUNCTION()
+	void OnRep_MaxLuck(const FGameplayAttributeData& OldMaxLuck) const;
+
+
+private:
+
+	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 };

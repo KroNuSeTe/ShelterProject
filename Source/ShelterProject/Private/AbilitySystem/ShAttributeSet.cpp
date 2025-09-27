@@ -2,6 +2,9 @@
 
 #include "Public/AbilitySystem/ShAttributeSet.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameplayEffectExtension.h"
+#include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
 UShAttributeSet::UShAttributeSet()
@@ -9,16 +12,16 @@ UShAttributeSet::UShAttributeSet()
 	InitHealth(50.f);
 	InitMaxHealth(100.f);
 
-	InitStamina(60.f);
+	InitStamina(10.f);
 	InitMaxStamina(60.f);
 
 	InitMorale(100.f);
 	InitMaxMorale(100.f);
 	
-	InitHunger(100.f);
+	InitHunger(20.f);
 	InitMaxHunger(100.f);
 	
-	InitThirst(100.f);
+	InitThirst(40.f);
 	InitMaxThirst(100.f);
 
 	InitStrength(100.f);
@@ -57,6 +60,15 @@ void UShAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxStamina, COND_None, REPNOTIFY_Always);
 
 	// Skills / Stats
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Morale, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxMorale, COND_None, REPNOTIFY_Always);
+
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Hunger, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxHunger, COND_None, REPNOTIFY_Always);
+
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Thirst, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxThirst, COND_None, REPNOTIFY_Always);
+	
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Strength, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxStrength, COND_None, REPNOTIFY_Always);
 
@@ -81,6 +93,78 @@ void UShAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MachineAffinity, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxMachineAffinity, COND_None, REPNOTIFY_Always);
 
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Luck, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxLuck, COND_None, REPNOTIFY_Always);
+
+}
+
+void UShAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
+{
+	Super::PreAttributeChange(Attribute, NewValue);
+
+	if (Attribute == GetHealthAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+	}
+	if (Attribute == GetStaminaAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxStamina());
+	}
+	if (Attribute == GetMoraleAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMorale());
+	}
+	if (Attribute == GetHungerAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHunger());
+	}
+	if (Attribute == GetThirstAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxThirst());
+	}
+
+}
+
+void UShAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
+{
+	// Source = causer of the effect, Target = target of the effect (owner of this AS).
+	
+	Props.EffectContextHandle = Data.EffectSpec.GetContext();
+	Props.SourceASC = Props.EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
+
+	if (IsValid(Props.SourceASC) && Props.SourceASC->AbilityActorInfo.IsValid() && Props.SourceASC->AbilityActorInfo->AvatarActor.IsValid())
+	{
+		Props.SourceAvatarActor = Props.SourceASC->AbilityActorInfo->AvatarActor.Get();
+		Props.SourceController = Props.SourceASC->AbilityActorInfo->PlayerController.Get();
+		if (Props.SourceController == nullptr && Props.SourceAvatarActor != nullptr)
+		{
+			if (const APawn* Pawn = Cast<APawn>(Props.SourceAvatarActor))
+			{
+				Props.SourceController = Pawn->GetController();
+			}
+		}
+		if (Props.SourceController)
+		{
+			Props.SourceCharacter = Cast<ACharacter>(Props.SourceController->GetPawn());
+		}
+	}
+
+	if (Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo->AvatarActor.IsValid())
+	{
+		Props.TargetAvatarActor = Data.Target.AbilityActorInfo->AvatarActor.Get();
+		Props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
+		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);
+		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Props.TargetAvatarActor);
+	}
+}
+
+void UShAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+{
+	Super::PostGameplayEffectExecute(Data);
+
+	FEffectProperties Props;
+	SetEffectProperties(Data,Props);
+	
 }
 
 void UShAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
@@ -213,4 +297,15 @@ void UShAttributeSet::OnRep_MaxMachineAffinity(const FGameplayAttributeData& Old
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxMachineAffinity, OldMaxMachineAffinity);
 }
+
+void UShAttributeSet::OnRep_Luck(const FGameplayAttributeData& OldLuck) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Luck, OldLuck);
+}
+
+void UShAttributeSet::OnRep_MaxLuck(const FGameplayAttributeData& OldMaxLuck) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxLuck, OldMaxLuck);
+}
+
 

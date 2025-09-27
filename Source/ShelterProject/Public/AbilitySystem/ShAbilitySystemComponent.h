@@ -11,13 +11,10 @@ class SHELTERPROJECT_API UShAbilitySystemComponent : public UAbilitySystemCompon
 {
 	GENERATED_BODY()
 
-public:
-	UShAbilitySystemComponent();
-
+	public:
+	void AbilityActorInfoSet();
+	
 protected:
-	virtual void BeginPlay() override;
-
-public:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec,
+		FActiveGameplayEffectHandle ActiveGameplayEffectHandle);
 };

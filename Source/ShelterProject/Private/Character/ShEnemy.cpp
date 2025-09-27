@@ -36,7 +36,13 @@ void AShEnemy::UnHighlightActor()
 void AShEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	InitAbilityActorInfo();
+}
+
+void AShEnemy::InitAbilityActorInfo()
+{
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	Cast<UShAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 }
 
