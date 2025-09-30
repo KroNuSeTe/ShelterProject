@@ -5,14 +5,17 @@
 #include "AbilitySystemComponent.h"
 #include "ShAbilitySystemComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*AssetTags*/);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SHELTERPROJECT_API UShAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 
-	public:
+public:
 	void AbilityActorInfoSet();
+
+	FEffectAssetTags EffectAssetTags;	
 	
 protected:
 	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec,

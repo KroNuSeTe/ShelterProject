@@ -61,5 +61,7 @@ void AShCharacter::InitAbilityActorInfo()
 			ShHUD->InitOverlay(ShPlayerController, ShPlayerState, AbilitySystemComponent, AttributeSet);
 		}
 	}
+
+	InitializePrimaryAttributes();
 	
 }

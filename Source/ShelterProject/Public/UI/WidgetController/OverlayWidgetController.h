@@ -4,41 +4,35 @@
 
 #include "CoreMinimal.h"
 #include "ShWidgetController.h"
+#include "AbilitySystem/ShAttributeSet.h"
 #include "OverlayWidgetController.generated.h"
 
+USTRUCT(BlueprintType)
+struct FUIWidgetRow : public FTableRowBase
+{
+	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTag MessageTag = FGameplayTag();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText Message = FText();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<class UShUserWidget> MessageWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UTexture2D* Image = nullptr;
+};
+
+class UShUserWidget;
 struct FOnAttributeChangeData;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, NewHealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHealthChangedSignature, float, NewMaxHealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaChangedSignature, float, NewStamina);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxStaminaChangedSignature, float, NewMaxStamina);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnmoraleChangedSignature, float, NewMorale);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxMoraleChangedSignature, float, NewMaxMorale);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHungerChangedSignature, float, NewHunger);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHungerChangedSignature, float, NewMaxHunger);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnThirstChangedSignature, float, NewThirst);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxThirstChangedSignature, float, NewMaxThirst);
+// Default float Delegate for all Attributes
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
 
-// Skills / Stats
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStrengthChangedSignature, float, NewStrength);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxStrengthChangedSignature, float, NewMaxStrength);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTechSkillChangedSignature, float, NewTechSkill);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxTechSkillChangedSignature, float, NewMaxTechSkill);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPerceptionChangedSignature, float, NewPerception);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxPerceptionChangedSignature, float, NewMaxPerception);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLeadershipChangedSignature, float, NewLeadership);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxLeadershipChangedSignature, float, NewMaxLeadership);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStealthChangedSignature, float, NewStealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxStealthChangedSignature, float, NewMaxStealth);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMentalStabilityChangedSignature, float, NewMentalStability);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxMentalStabilityChangedSignature, float, NewMaxMentalStability);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHopeChangedSignature, float, NewHope);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHopeChangedSignature, float, NewMaxHope);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMachineAffinityChangedSignature, float, NewMachineAffinity);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxMachineAffinityChangedSignature, float, NewMaxMachineAffinity);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLuckChangedSignature, float, NewLuck);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxLuckChangedSignature, float, NewMaxLuck);
+// Struct Row Delegate
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
 
 /**
  * 
@@ -50,121 +44,108 @@ class SHELTERPROJECT_API UOverlayWidgetController : public UShWidgetController
 
 public:
 	virtual void BroadcastInitialValues() override;
+	void RegisterAttributeChangeCallbacks(const UShAttributeSet* ShAttributeSet);
 	virtual void BindCallBacksToDependencies() override;
 	
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnHealthChangedSignature OnHealthChanged;
+	FOnAttributeChangedSignature OnHealthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxHealthChangedSignature OnMaxHealthChanged;
+	FOnAttributeChangedSignature OnMaxHealthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnStaminaChangedSignature OnStaminaChanged;
+	FOnAttributeChangedSignature OnStaminaChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxStaminaChangedSignature OnMaxStaminaChanged;
+	FOnAttributeChangedSignature OnMaxStaminaChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnmoraleChangedSignature OnMoraleChanged;
+	FOnAttributeChangedSignature OnMoraleChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxMoraleChangedSignature OnMaxMoraleChanged;
+	FOnAttributeChangedSignature OnMaxMoraleChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnHungerChangedSignature OnHungerChanged;
+	FOnAttributeChangedSignature OnHungerChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxHungerChangedSignature OnMaxHungerChanged;
+	FOnAttributeChangedSignature OnMaxHungerChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnThirstChangedSignature OnThirstChanged;
+	FOnAttributeChangedSignature OnThirstChanged;
 	
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxThirstChangedSignature OnMaxThirstChanged;
+	FOnAttributeChangedSignature OnMaxThirstChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnStrengthChangedSignature OnStrengthChanged;
+	FOnAttributeChangedSignature OnStrengthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxStrengthChangedSignature OnMaxStrengthChanged;
+	FOnAttributeChangedSignature OnMaxStrengthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnTechSkillChangedSignature OnTechSkillChanged;
+	FOnAttributeChangedSignature OnTechSkillChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxTechSkillChangedSignature OnMaxTechSkillChanged;
+	FOnAttributeChangedSignature OnMaxTechSkillChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnPerceptionChangedSignature OnPerceptionChanged;
+	FOnAttributeChangedSignature OnPerceptionChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxPerceptionChangedSignature OnMaxPerceptionChanged;
+	FOnAttributeChangedSignature OnMaxPerceptionChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnLeadershipChangedSignature OnLeadershipChanged;
+	FOnAttributeChangedSignature OnLeadershipChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxLeadershipChangedSignature OnMaxLeadershipChanged;
+	FOnAttributeChangedSignature OnMaxLeadershipChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnStealthChangedSignature OnStealthChanged;
+	FOnAttributeChangedSignature OnStealthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxStealthChangedSignature OnMaxStealthChanged;
+	FOnAttributeChangedSignature OnMaxStealthChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMentalStabilityChangedSignature OnMentalStabilityChanged;
+	FOnAttributeChangedSignature OnMentalStabilityChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxMentalStabilityChangedSignature OnMaxMentalStabilityChanged;
+	FOnAttributeChangedSignature OnMaxMentalStabilityChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnHopeChangedSignature OnHopeChanged;
+	FOnAttributeChangedSignature OnHopeChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxHopeChangedSignature OnMaxHopeChanged;
+	FOnAttributeChangedSignature OnMaxHopeChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMachineAffinityChangedSignature OnMachineAffinityChanged;
+	FOnAttributeChangedSignature OnMachineAffinityChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxMachineAffinityChangedSignature OnMaxMachineAffinityChanged;
+	FOnAttributeChangedSignature OnMaxMachineAffinityChanged;
 	
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnLuckChangedSignature OnLuckChanged;
+	FOnAttributeChangedSignature OnLuckChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
-	FOnMaxLuckChangedSignature OnMaxLuckChanged;	
+	FOnAttributeChangedSignature OnMaxLuckChanged;
+
+	//Struct Row Delegate
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
+	FMessageWidgetRowSignature OnMessageWidgetRowDelegate;
 
 protected:
-	void HealthChanged(const FOnAttributeChangeData& Data) const;
-	void MaxHealthChanged(const FOnAttributeChangeData& Data) const;
-	void StaminaChanged(const FOnAttributeChangeData& Data) const;
-	void MaxStaminaChanged(const FOnAttributeChangeData& Data) const;
-	void MoraleChanged(const FOnAttributeChangeData& Data) const;
-	void MaxMoraleChanged(const FOnAttributeChangeData& Data) const;
-	void HungerChanged(const FOnAttributeChangeData& Data) const;
-	void MaxHungerChanged(const FOnAttributeChangeData& Data) const;
-	void ThirstChanged(const FOnAttributeChangeData& Data) const;
-	void MaxThirstChanged(const FOnAttributeChangeData& Data) const;
-	void StrengthChanged(const FOnAttributeChangeData& Data) const;
-	void MaxStrengthChanged(const FOnAttributeChangeData& Data) const;
-	void TechSkillChanged(const FOnAttributeChangeData& Data) const;
-	void MaxTechSkillChanged(const FOnAttributeChangeData& Data) const;
-	void PerceptionChanged(const FOnAttributeChangeData& Data) const;
-	void MaxPerceptionChanged(const FOnAttributeChangeData& Data) const;
-	void LeadershipChanged(const FOnAttributeChangeData& Data) const;
-	void MaxLeadershipChanged(const FOnAttributeChangeData& Data) const;
-	void StealthChanged(const FOnAttributeChangeData& Data) const;
-	void MaxStealthChanged(const FOnAttributeChangeData& Data) const;
-	void MentalStabilityChanged(const FOnAttributeChangeData& Data) const;
-	void MaxMentalStabilityChanged(const FOnAttributeChangeData& Data) const;
-	void HopeChanged(const FOnAttributeChangeData& Data) const;
-	void MaxHopeChanged(const FOnAttributeChangeData& Data) const;
-	void MachineAffinityChanged(const FOnAttributeChangeData& Data) const;
-	void MaxMachineAffinityChanged(const FOnAttributeChangeData& Data) const;
-	void LuckChanged(const FOnAttributeChangeData& Data) const;
-	void MaxLuckChanged(const FOnAttributeChangeData& Data) const;
-	
- 
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
+	TObjectPtr<UDataTable> MessageWidgetDataTable;
+
+	template<typename T>
+	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
 };
+
+template <typename T>
+T* UOverlayWidgetController::GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag)
+{
+	return DataTable->FindRow<T>(Tag.GetTagName(), TEXT(""));
+}
