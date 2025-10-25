@@ -6,41 +6,54 @@
 #include "GameplayEffectExtension.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "ShGameplayTags.h"
 
 UShAttributeSet::UShAttributeSet()
 {
-	InitHealth(50.f);
-	InitMaxHealth(100.f);
+	// Primary Attributes
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Primary::Strength, GetStrengthAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Primary::Toughness, GetToughnessAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Primary::Dexterity, GetDexterityAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Primary::Intelligence, GetIntelligenceAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Primary::Charisma, GetCharismaAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Primary::Perception, GetPerceptionAttribute);
 
-	InitStamina(10.f);
-	InitMaxStamina(60.f);
-
-	InitMobility(10.f);
+	// Secondary Attributes
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Health, GetHealthAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxHealth, GetMaxHealthAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Armor, GetArmorAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxArmor, GetMaxArmorAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Stamina, GetStaminaAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxStamina, GetMaxStaminaAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::PowerCore, GetPowerCoreAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxPowerCore, GetMaxPowerCoreAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Mobility, GetMobilityAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxMobility, GetMaxMobilityAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Damage, GetDamageAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::CriticalChance, GetCriticalChanceAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::CriticalDamage, GetCriticalDamageAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::HealthRegen, GetHealthRegenAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::StaminaRegen, GetStaminaRegenAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::PowerRegen, GetPowerRegenAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Hunger, GetHungerAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxHunger, GetMaxHungerAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Thirst, GetThirstAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxThirst, GetMaxThirstAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Fatigue, GetFatigueAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxFatigue, GetMaxFatigueAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Stress, GetStressAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxStress, GetMaxStressAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Contamination, GetContaminationAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxContamination, GetMaxContaminationAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::Processing, GetProcessingAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxProcessing, GetMaxProcessingAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::LoyaltyProtocol, GetLoyaltyProtocolAttribute);
+	TagsToAttributes.Add(ShGameplayTags::Attributes::Secondary::MaxLoyaltyProtocol, GetMaxLoyaltyProtocolAttribute);
 	
-	InitHunger(20.f);
-	InitMaxHunger(100.f);
 	
-	InitThirst(40.f);
-	InitMaxThirst(100.f);
-
-	InitFatigue(0.f);
-	InitMaxFatigue(100.f);
 	
-	InitStress(0.f);
-	InitMaxStress(100.f);
-	
-	InitTrauma(0.f);
-	InitMaxTrauma(100.f);
-	
-	InitContamination(0.f);
-	InitMaxContamination(100.f);
-
-	InitPowerCore(0.f);
-	InitProcessing(0.f);
-	InitLoyaltyProtocol(0.f);
-	InitUpgradeSlots(0.f);
-	
-
+	Hunger = 80.f;
+	Thirst = 50.f;
 }
 
 void UShAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -49,6 +62,7 @@ void UShAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>
 	
 	// Primary Attributes
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Strength, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Toughness, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Dexterity, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Intelligence, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Charisma, COND_None, REPNOTIFY_Always);
@@ -61,95 +75,34 @@ void UShAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxArmor, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Stamina, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxStamina, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, PowerCore, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxPowerCore, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Mobility, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Accuracy, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Damage, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, CriticalHitChance, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, CriticalHitDamage, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, CriticalHitResistance, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, ArmorPenetration, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, BlockChance, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxEnergy, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, CriticalChance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, CriticalDamage, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, HealthRegen, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, StaminaRegen, COND_None, REPNOTIFY_Always);
 
-	// Regeneration Attributes
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, HealthRegen, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, StaminaRegen, COND_None, REPNOTIFY_Always);
-
-	// Survival Stats
+	// Survival Attributes
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Hunger, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxHunger, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Thirst, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxThirst, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, Fatigue, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, MaxFatigue, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, Stress, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, MaxStress, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, Trauma, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, MaxTrauma, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, Contamination, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, MaxContamination, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Fatigue, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxFatigue, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Stress, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxStress, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Contamination, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxContamination, COND_None, REPNOTIFY_Always);
 
 	// Special Attributes - Robot
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, PowerCore, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, MaxPowerCore, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, Processing, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, MaxProcessing, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, LoyaltyProtocol, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, MaxLoyaltyProtocol, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UShAttributeSet, UpgradeSlots, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, Processing, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxProcessing, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, LoyaltyProtocol, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ThisClass, MaxLoyaltyProtocol, COND_None, REPNOTIFY_Always);
 
 	
-}
-
-void UShAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
-{
-	Super::PreAttributeChange(Attribute, NewValue);
-
-	if (Attribute == GetHealthAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
-	}
-	if (Attribute == GetStaminaAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxStamina());
-	}
-	if (Attribute == GetHungerAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHunger());
-	}
-	if (Attribute == GetThirstAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxThirst());
-	}
-	if (Attribute == GetFatigueAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxFatigue());
-	}
-	if (Attribute == GetStressAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxStress());
-	}
-	if (Attribute == GetTraumaAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxTrauma());
-	}
-	if (Attribute == GetContaminationAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxContamination());
-	}
-	if (Attribute == GetPowerCoreAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxPowerCore());
-	}
-	if (Attribute == GetProcessingAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxProcessing());
-	}
-	if (Attribute == GetLoyaltyProtocolAttribute())
-	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxLoyaltyProtocol());
-	}
-
 }
 
 void UShAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
@@ -217,10 +170,6 @@ void UShAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 	{
 		SetStress(FMath::Clamp(GetStress(), 0.f, GetMaxStress()));
 	}
-	if (Data.EvaluatedData.Attribute == GetTraumaAttribute())
-	{
-		SetTrauma(FMath::Clamp(GetTrauma(), 0.f, GetMaxTrauma()));
-	}
 	if (Data.EvaluatedData.Attribute == GetContaminationAttribute())
 	{
 		SetContamination(FMath::Clamp(GetContamination(), 0.f, GetMaxContamination()));
@@ -234,6 +183,16 @@ void UShAttributeSet::OnRep_Strength(const FGameplayAttributeData& OldStrength) 
 	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Strength, OldStrength);
 }
 
+void UShAttributeSet::OnRep_Toughness(const FGameplayAttributeData& OldToughness) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Toughness, OldToughness);
+}
+
+void UShAttributeSet::OnRep_Dexterity(const FGameplayAttributeData& OldDexterity) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Dexterity, OldDexterity);
+}
+
 void UShAttributeSet::OnRep_Intelligence(const FGameplayAttributeData& OldIntelligence) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Intelligence, OldIntelligence);
@@ -242,11 +201,6 @@ void UShAttributeSet::OnRep_Intelligence(const FGameplayAttributeData& OldIntell
 void UShAttributeSet::OnRep_Charisma(const FGameplayAttributeData& OldCharisma) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Charisma, OldCharisma);
-}
-
-void UShAttributeSet::OnRep_Dexterity(const FGameplayAttributeData& OldDexterity) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Dexterity, OldDexterity);
 }
 
 void UShAttributeSet::OnRep_Perception(const FGameplayAttributeData& OldPerception) const
@@ -258,22 +212,22 @@ void UShAttributeSet::OnRep_Perception(const FGameplayAttributeData& OldPercepti
 // Combat Attributes
 void UShAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Health, OldHealth);	
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Health, OldHealth);	
 }
 
 void UShAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxHealth, OldMaxHealth);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxHealth, OldMaxHealth);
 }
 
 void UShAttributeSet::OnRep_Armor(const FGameplayAttributeData& OldArmor) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Armor, OldArmor);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Armor, OldArmor);
 }
 
 void UShAttributeSet::OnRep_MaxArmor(const FGameplayAttributeData& OldMaxArmor) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxArmor, OldMaxArmor);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxArmor, OldMaxArmor);
 }
 
 void UShAttributeSet::OnRep_Stamina(const FGameplayAttributeData& OldStamina) const
@@ -286,55 +240,54 @@ void UShAttributeSet::OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStami
 	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxStamina, OldMaxStamina);
 }
 
+void UShAttributeSet::OnRep_PowerCore(const FGameplayAttributeData& OldPowerCore) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, PowerCore, OldPowerCore);
+}
+
+void UShAttributeSet::OnRep_MaxPowerCore(const FGameplayAttributeData& OldMaxPowerCore) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxPowerCore, OldMaxPowerCore);
+}
+
 void UShAttributeSet::OnRep_Mobility(const FGameplayAttributeData& OldMobility) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Mobility, OldMobility);
 }
 
-void UShAttributeSet::OnRep_Accuracy(const FGameplayAttributeData& OldAccuracy) const
+void UShAttributeSet::OnRep_MaxMobility(const FGameplayAttributeData& OldMaxMobility) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Accuracy, OldAccuracy);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxMobility, OldMaxMobility);
 }
+
 void UShAttributeSet::OnRep_Damage(const FGameplayAttributeData& OldDamage) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Damage, OldDamage);
-}
-void UShAttributeSet::OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, CriticalHitChance, OldCriticalHitChance);
-}
-void UShAttributeSet::OnRep_CriticalHitDamage(const FGameplayAttributeData& OldCriticalHitDamage) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, CriticalHitDamage, OldCriticalHitDamage);
-}
-void UShAttributeSet::OnRep_CriticalHitResistance(const FGameplayAttributeData& OldCriticalHitResistance) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, CriticalHitResistance, OldCriticalHitResistance);
-}
-void UShAttributeSet::OnRep_ArmorPenetration(const FGameplayAttributeData& OldArmorPenetration) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, ArmorPenetration, OldArmorPenetration);
-}
-void UShAttributeSet::OnRep_BlockChance(const FGameplayAttributeData& OldBlockChance) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, BlockChance, OldBlockChance);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Damage, OldDamage);
 }
 
-void UShAttributeSet::OnRep_MaxEnergy(const FGameplayAttributeData& OldMaxEnergy) const
+void UShAttributeSet::OnRep_CriticalChance(const FGameplayAttributeData& OldCriticalChance) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxEnergy, OldMaxEnergy);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, CriticalChance, OldCriticalChance);
 }
 
+void UShAttributeSet::OnRep_CriticalDamage(const FGameplayAttributeData& OldCriticalDamage) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, CriticalDamage, OldCriticalDamage);
+}
 
-// Regeneration Attributes
 void UShAttributeSet::OnRep_HealthRegen(const FGameplayAttributeData& OldHealthRegen) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, HealthRegen, OldHealthRegen);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, HealthRegen, OldHealthRegen);
 }
 
 void UShAttributeSet::OnRep_StaminaRegen(const FGameplayAttributeData& OldStaminaRegen) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, StaminaRegen, OldStaminaRegen);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, StaminaRegen, OldStaminaRegen);
+}
+
+void UShAttributeSet::OnRep_PowerRegen(const FGameplayAttributeData& OldPowerRegen) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, PowerRegen, OldPowerRegen);
 }
 
 
@@ -361,79 +314,54 @@ void UShAttributeSet::OnRep_MaxThirst(const FGameplayAttributeData& OldMaxThirst
 
 void UShAttributeSet::OnRep_Fatigue(const FGameplayAttributeData& OldFatigue) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Fatigue, OldFatigue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Fatigue, OldFatigue);
 }
 
 void UShAttributeSet::OnRep_MaxFatigue(const FGameplayAttributeData& OldMaxFatigue) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxFatigue, OldMaxFatigue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxFatigue, OldMaxFatigue);
 }
 
 void UShAttributeSet::OnRep_Stress(const FGameplayAttributeData& OldStress) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Stress, OldStress);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Stress, OldStress);
 }
 
 void UShAttributeSet::OnRep_MaxStress(const FGameplayAttributeData& OldMaxStress) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxStress, OldMaxStress);
-}
-
-void UShAttributeSet::OnRep_Trauma(const FGameplayAttributeData& OldTrauma) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Trauma, OldTrauma);
-}
-
-void UShAttributeSet::OnRep_MaxTrauma(const FGameplayAttributeData& OldMaxTrauma) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxTrauma, OldMaxTrauma);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxStress, OldMaxStress);
 }
 
 void UShAttributeSet::OnRep_Contamination(const FGameplayAttributeData& OldContamination) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Contamination, OldContamination);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Contamination, OldContamination);
 }
 
 void UShAttributeSet::OnRep_MaxContamination(const FGameplayAttributeData& OldMaxContamination) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxContamination, OldMaxContamination);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxContamination, OldMaxContamination);
 }
 
 
-// Special Attributes - Robot
-void UShAttributeSet::OnRep_PowerCore(const FGameplayAttributeData& OldPowerCore) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, PowerCore, OldPowerCore);
-}
-
-void UShAttributeSet::OnRep_MaxPowerCore(const FGameplayAttributeData& OldMaxPowerCore) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxPowerCore, OldMaxPowerCore);
-}
-
+// Special Attributes - RoboTS
 void UShAttributeSet::OnRep_Processing(const FGameplayAttributeData& OldProcessing) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, Processing, OldProcessing);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, Processing, OldProcessing);
 }
 
 void UShAttributeSet::OnRep_MaxProcessing(const FGameplayAttributeData& OldMaxProcessing) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxProcessing, OldMaxProcessing);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxProcessing, OldMaxProcessing);
 }
 
 void UShAttributeSet::OnRep_LoyaltyProtocol(const FGameplayAttributeData& OldLoyaltyProtocol) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, LoyaltyProtocol, OldLoyaltyProtocol);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, LoyaltyProtocol, OldLoyaltyProtocol);
 }
 
 void UShAttributeSet::OnRep_MaxLoyaltyProtocol(const FGameplayAttributeData& OldMaxLoyaltyProtocol) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, MaxLoyaltyProtocol, OldMaxLoyaltyProtocol);
-}
-
-void UShAttributeSet::OnRep_UpgradeSlots(const FGameplayAttributeData& OldUpgradeSlots) const
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UShAttributeSet, UpgradeSlots, OldUpgradeSlots);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ThisClass, MaxLoyaltyProtocol, OldMaxLoyaltyProtocol);
 }
 
 

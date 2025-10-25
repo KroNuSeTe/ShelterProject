@@ -6,6 +6,7 @@
 #include "Public/UI/WidgetController/ShWidgetController.h"
 #include "Public/UI/Widget/ShUserWidget.h"
 #include "Public/UI/WidgetController/OverlayWidgetController.h"
+#include "UI/WidgetController/AttributeMenuWidgetController.h"
 
 UOverlayWidgetController* AShHUD::GetOverlayWidgetController(const FWidgetControllerParams& WCParams)
 {
@@ -14,14 +15,23 @@ UOverlayWidgetController* AShHUD::GetOverlayWidgetController(const FWidgetContro
 		OverlayWidgetController = NewObject<UOverlayWidgetController>(this, OverlayWidgetControllerClass);
 		OverlayWidgetController->SetWidgetControllerParams(WCParams);
 		OverlayWidgetController->BindCallBacksToDependencies();
-
-		return OverlayWidgetController;
 	}
 	return OverlayWidgetController;
 }
 
+UAttributeMenuWidgetController* AShHUD::GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams)
+{
+	if (AttributeMenuWidgetController == nullptr)
+	{
+		AttributeMenuWidgetController = NewObject<UAttributeMenuWidgetController>(this, AttributeMenuWidgetControllerClass);
+		AttributeMenuWidgetController->SetWidgetControllerParams(WCParams);
+		AttributeMenuWidgetController->BindCallBacksToDependencies();
+	}
+	return AttributeMenuWidgetController;
+}
+
 void AShHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC,
-	UAttributeSet* AS)
+                         UAttributeSet* AS)
 {
 	checkf(OverlayWidgetClass, TEXT("OverlayWidgetClass uninitialized, please fill out BP_ShHUD"));
 	checkf(OverlayWidgetControllerClass, TEXT("OverlayWidgetControllerClass uninitialized, please fill out BP_ShHUD"));

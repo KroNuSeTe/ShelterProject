@@ -21,7 +21,9 @@ public class ShelterProject : ModuleRules
 			"Niagara",
 			"UMG",
 			"Slate",
-			"GameplayAbilities"
+			"GameplayAbilities",
+			"Inventory",
+			"NavigationSystem"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
@@ -30,13 +32,7 @@ public class ShelterProject : ModuleRules
 		});
 
 		PublicIncludePaths.AddRange(new string[] {
-			"ShelterProject",
-			"ShelterProject/Variant_Strategy",
-			"ShelterProject/Variant_Strategy/UI",
-			"ShelterProject/Variant_TwinStick",
-			"ShelterProject/Variant_TwinStick/AI",
-			"ShelterProject/Variant_TwinStick/Gameplay",
-			"ShelterProject/Variant_TwinStick/UI"
+			"ShelterProject"
 		});
 
 		// Uncomment if you are using Slate UI

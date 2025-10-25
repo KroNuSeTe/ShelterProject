@@ -33,6 +33,11 @@ void AShEnemy::UnHighlightActor()
 	Weapon->SetRenderCustomDepth(false);
 }
 
+int32 AShEnemy::GetPlayerLevel()
+{
+	return Level;
+}
+
 void AShEnemy::BeginPlay()
 {
 	Super::BeginPlay();

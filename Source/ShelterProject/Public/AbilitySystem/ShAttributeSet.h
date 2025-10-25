@@ -12,6 +12,7 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+
 USTRUCT()
 struct FEffectProperties
 {
@@ -47,6 +48,11 @@ struct FEffectProperties
 	
 };
 
+// typedef is specific to the FGameplayAttribute() signature, but TStaticFunPtr is generic to any signature chosen
+// typedef TBaseStaticDelegateInstance <FGameplayAttribute(),FDefaultDelegateUserPolicy>::FFuncPtr FAttributeFuncPtr;
+template<class T>
+using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
+
 /**
  * 
  */
@@ -58,25 +64,36 @@ class SHELTERPROJECT_API UShAttributeSet : public UAttributeSet
 public:
 	UShAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
-
+	
+	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
+	
+	
 	// Primary Attributes
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Strength, Category = "Primary Attributes")
 	FGameplayAttributeData Strength;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, Strength);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Toughness, Category = "Attributes|Primary")
+	FGameplayAttributeData Toughness;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, Toughness);
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Dexterity, Category = "Attributes|Primary")
 	FGameplayAttributeData Dexterity;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, Dexterity);
 	
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Intelligence, Category = "Attributes|Primary")
 	FGameplayAttributeData Intelligence;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, Intelligence);
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Charisma, Category = "Attributes|Primary")
 	FGameplayAttributeData Charisma;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, Charisma);
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Perception, Category = "Attributes|Primary")
 	FGameplayAttributeData Perception;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, Perception);
 
 	// Combat Attributes
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Combat Attributes")
@@ -103,54 +120,48 @@ public:
 	FGameplayAttributeData MaxStamina;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxStamina);
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_PowerCore, Category = "Combat Attributes")
+	FGameplayAttributeData PowerCore;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, PowerCore);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxPowerCore, Category = "Combat Attributes")
+	FGameplayAttributeData MaxPowerCore;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxPowerCore);
+
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mobility, Category = "Combat Attributes")
 	FGameplayAttributeData Mobility;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, Mobility);
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Accuracy, Category="Combat Attributes")
-	FGameplayAttributeData Accuracy;
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, Accuracy);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMobility, Category = "Combat Attributes")
+	FGameplayAttributeData MaxMobility;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxMobility);
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Damage, Category="Combat Attributes")
 	FGameplayAttributeData Damage;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, Damage);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalHitChance, Category="Combat Attributes")
-	FGameplayAttributeData CriticalHitChance; // 0..100 (%)
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, CriticalHitChance);
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalChance, Category="Combat Attributes")
+	FGameplayAttributeData CriticalChance;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, CriticalChance);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalHitDamage, Category="Combat Attributes")
-	FGameplayAttributeData CriticalHitDamage; // 0..500 (%) bonus sobre daño base
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, CriticalHitDamage);
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalHitResistance, Category="Combat Attributes")
-	FGameplayAttributeData CriticalHitResistance; // 0..100 (%)
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, CriticalHitResistance);
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_ArmorPenetration, Category="Combat Attributes")
-	FGameplayAttributeData ArmorPenetration; // 0..100 (%)
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, ArmorPenetration);
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_BlockChance, Category="Combat Attributes")
-	FGameplayAttributeData BlockChance; // 0..100 (%)
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, BlockChance);
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxEnergy, Category="Resource Attributes")
-	FGameplayAttributeData MaxEnergy;
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxEnergy);
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalDamage, Category="Combat Attributes")
+	FGameplayAttributeData CriticalDamage;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, CriticalDamage);
 	
-
-	// Regeneration Attributes
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes|Regen", ReplicatedUsing = OnRep_HealthRegen)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_HealthRegen, Category = "Attributes|Regen")
 	FGameplayAttributeData HealthRegen;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, HealthRegen)
 	
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes|Regen", ReplicatedUsing = OnRep_StaminaRegen)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_StaminaRegen, Category = "Attributes|Regen")
 	FGameplayAttributeData StaminaRegen;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, StaminaRegen)
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_PowerRegen, Category = "Attributes|Regen")
+	FGameplayAttributeData PowerRegen;
+	ATTRIBUTE_ACCESSORS(UShAttributeSet, PowerRegen)
 	
 
-	// Survival Stats
+	// Survival Attributes
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Hunger, Category = "Survival Attributes")
 	FGameplayAttributeData Hunger;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, Hunger);
@@ -167,47 +178,32 @@ public:
 	FGameplayAttributeData MaxThirst;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxThirst);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Fatigue, Category = "Status Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Fatigue, Category = "Survival Attributes")
 	FGameplayAttributeData Fatigue;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, Fatigue);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxFatigue, Category = "Status Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxFatigue, Category = "Survival Attributes")
 	FGameplayAttributeData MaxFatigue;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxFatigue);
 	
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Stress, Category = "Status Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Stress, Category = "Survival Attributes")
 	FGameplayAttributeData Stress;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, Stress);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxStress, Category = "Status Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxStress, Category = "Survival Attributes")
 	FGameplayAttributeData MaxStress;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxStress);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Trauma, Category = "Status Attributes")
-	FGameplayAttributeData Trauma;
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, Trauma);
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxTrauma, Category = "Status Attributes")
-	FGameplayAttributeData MaxTrauma;
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxTrauma);
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Contamination, Category = "Status Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Contamination, Category = "Survival Attributes")
 	FGameplayAttributeData Contamination;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, Contamination);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxContamination, Category = "Status Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxContamination, Category = "Survival Attributes")
 	FGameplayAttributeData MaxContamination;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxContamination);
 
 	
-	// Special Attributes - Robot
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes|Robot", ReplicatedUsing = OnRep_PowerCore)
-	FGameplayAttributeData PowerCore;
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, PowerCore)
-
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes|Robot", ReplicatedUsing = OnRep_MaxPowerCore)
-	FGameplayAttributeData MaxPowerCore;
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxPowerCore)
+	// Special Attributes - Robots
 
 	UPROPERTY(BlueprintReadOnly, Category = "Attributes|Robot", ReplicatedUsing = OnRep_Processing)
 	FGameplayAttributeData Processing;
@@ -224,17 +220,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Attributes|Robot", ReplicatedUsing = OnRep_MaxLoyaltyProtocol)
 	FGameplayAttributeData MaxLoyaltyProtocol;
 	ATTRIBUTE_ACCESSORS(UShAttributeSet, MaxLoyaltyProtocol)
-
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes|Robot", ReplicatedUsing = OnRep_UpgradeSlots)
-	FGameplayAttributeData UpgradeSlots;
-	ATTRIBUTE_ACCESSORS(UShAttributeSet, UpgradeSlots)
-
 	
 
 	// Primary Attributes
 	UFUNCTION()
 	void OnRep_Strength(const FGameplayAttributeData& OldStrength) const;
 
+	UFUNCTION()
+	void OnRep_Toughness(const FGameplayAttributeData& OldToughness) const;
+	
 	UFUNCTION()
 	void OnRep_Dexterity(const FGameplayAttributeData& OldDexterity) const;
 	
@@ -246,6 +240,7 @@ public:
 
 	UFUNCTION()
 	void OnRep_Perception(const FGameplayAttributeData& OldPerception) const;
+
 	
 	// Combat Attributes
 	UFUNCTION()
@@ -267,42 +262,36 @@ public:
 	void OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStamina) const;
 
 	UFUNCTION()
+	void OnRep_PowerCore(const FGameplayAttributeData& OldPowerCore) const;
+
+	UFUNCTION()
+	void OnRep_MaxPowerCore(const FGameplayAttributeData& OldMaxPowerCore) const;
+
+	UFUNCTION()
 	void OnRep_Mobility(const FGameplayAttributeData& OldMobility) const;
 
 	UFUNCTION()
-	void OnRep_Accuracy(const FGameplayAttributeData& OldAccuracy) const;
+	void OnRep_MaxMobility(const FGameplayAttributeData& OldMaxMobility) const;
 	
 	UFUNCTION()
 	void OnRep_Damage(const FGameplayAttributeData& OldDamage) const;
 
 	UFUNCTION()
-	void OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const;
+	void OnRep_CriticalChance(const FGameplayAttributeData& OldCriticalChance) const;
 
 	UFUNCTION()
-	void OnRep_CriticalHitDamage(const FGameplayAttributeData& OldCriticalHitDamage) const;
-
-	UFUNCTION()
-	void OnRep_CriticalHitResistance(const FGameplayAttributeData& OldCriticalHitResistance) const;
-
-	UFUNCTION()
-	void OnRep_ArmorPenetration(const FGameplayAttributeData& OldArmorPenetration) const;
-
-	UFUNCTION()
-	void OnRep_BlockChance(const FGameplayAttributeData& OldBlockChance) const;
-
-	UFUNCTION()
-	void OnRep_MaxEnergy(const FGameplayAttributeData& OldMaxEnergy) const;
-
+	void OnRep_CriticalDamage(const FGameplayAttributeData& OldCriticalDamage) const;
 	
-	// Regeneration Attributes
 	UFUNCTION()
 	void OnRep_HealthRegen(const FGameplayAttributeData& OldHealthRegen) const;
 
 	UFUNCTION()
 	void OnRep_StaminaRegen(const FGameplayAttributeData& OldStaminaRegen) const;
 
+	UFUNCTION()
+	void OnRep_PowerRegen(const FGameplayAttributeData& OldPowerRegen) const;
 	
-	// Survival Stats
+	// Survival Attributes
 	UFUNCTION()
 	void OnRep_Hunger(const FGameplayAttributeData& OldHunger) const;
 
@@ -328,12 +317,6 @@ public:
 	void OnRep_MaxStress(const FGameplayAttributeData& OldMaxStress) const;
 
 	UFUNCTION()
-	void OnRep_Trauma(const FGameplayAttributeData& OldTrauma) const;
-
-	UFUNCTION()
-	void OnRep_MaxTrauma(const FGameplayAttributeData& OldMaxTrauma) const;
-
-	UFUNCTION()
 	void OnRep_Contamination(const FGameplayAttributeData& OldContamination) const;
 
 	UFUNCTION()
@@ -341,12 +324,6 @@ public:
 
 
 	// Special Attributes - Robot
-	UFUNCTION()
-	void OnRep_PowerCore(const FGameplayAttributeData& OldPowerCore) const;
-
-	UFUNCTION()
-	void OnRep_MaxPowerCore(const FGameplayAttributeData& OldMaxPowerCore) const;
-
 	UFUNCTION()
 	void OnRep_Processing(const FGameplayAttributeData& OldProcessing) const;
 
@@ -359,8 +336,6 @@ public:
 	UFUNCTION()
 	void OnRep_MaxLoyaltyProtocol(const FGameplayAttributeData& OldMaxLoyaltyProtocol) const;
 
-	UFUNCTION()
-	void OnRep_UpgradeSlots(const FGameplayAttributeData& OldUpgradeSlots) const;
 
 private:
 

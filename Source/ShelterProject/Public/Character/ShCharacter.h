@@ -15,6 +15,10 @@ public:
 	AShCharacter();
 	virtual void OnRep_PlayerState() override;
 	virtual void PossessedBy(AController* NewController) override;
+
+	/** Combat Interface */
+	virtual int32 GetPlayerLevel() override;
+	/** end Combat Interface */
 	
 protected:
 	virtual void BeginPlay() override;

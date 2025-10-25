@@ -43,6 +43,16 @@ void AShCharacter::PossessedBy(AController* NewController)
 
 	// Init ability actor info for the Server
 	InitAbilityActorInfo();
+
+	// Add character abilities
+	AddCharacterAbilities();
+}
+
+int32 AShCharacter::GetPlayerLevel()
+{
+	const ASh_PlayerState* ShPlayerState = GetPlayerState<ASh_PlayerState>();
+	check(ShPlayerState);
+	return ShPlayerState->GetPlayerLevel();
 }
 
 void AShCharacter::InitAbilityActorInfo()
@@ -62,6 +72,6 @@ void AShCharacter::InitAbilityActorInfo()
 		}
 	}
 
-	InitializePrimaryAttributes();
+	InitializeDefaultAttributes();
 	
 }

@@ -3,6 +3,8 @@
 #include "Public/Character/ShCharacterBase.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/ShAbilitySystemComponent.h"
+#include "Player/Sh_PlayerState.h"
 
 
 AShCharacterBase::AShCharacterBase()
@@ -30,12 +32,29 @@ void AShCharacterBase::InitAbilityActorInfo()
 	
 }
 
-void AShCharacterBase::InitializePrimaryAttributes() const
+void AShCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const
 {
 	check(IsValid(GetAbilitySystemComponent()));
-	check(DefaultPrimaryAttributes);
-	const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
-	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(DefaultPrimaryAttributes, 1.f, ContextHandle);
-	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), GetAbilitySystemComponent());
+	check(GameplayEffectClass);
+	FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	ContextHandle.AddSourceObject(this);
+	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffectClass, Level, ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+}
+
+void AShCharacterBase::InitializeDefaultAttributes() const
+{
+	const int32 PlayerLevel = GetPlayerState<ASh_PlayerState>()->GetPlayerLevel();
+	ApplyEffectToSelf(DefaultPrimaryAttributes, PlayerLevel);
+	ApplyEffectToSelf(DefaultSecondaryAttributes, PlayerLevel);
+	ApplyEffectToSelf(DefaultVitalAttributes, PlayerLevel);
+}
+
+void AShCharacterBase::AddCharacterAbilities()
+{
+	UShAbilitySystemComponent* ShASC = CastChecked<UShAbilitySystemComponent>(AbilitySystemComponent);
+	if (!HasAuthority()) return;
+
+	ShASC->AddCharacterAbilities(StartupAbilities);	
 }
 

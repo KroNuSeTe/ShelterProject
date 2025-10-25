@@ -27,10 +27,10 @@ void UOverlayWidgetController::RegisterAttributeChangeCallbacks(const UShAttribu
 {
     // Health
     AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
-        ShAttributeSet->GetHealthAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
-    {
-        OnHealthChanged.Broadcast(Data.NewValue);
-    });
+        ShAttributeSet->GetHealthAttribute()).AddLambda([this, ShAttributeSet](const FOnAttributeChangeData& Data)
+        {
+	        OnHealthChanged.Broadcast(Data.NewValue);
+        });
 
     AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
         ShAttributeSet->GetMaxHealthAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)

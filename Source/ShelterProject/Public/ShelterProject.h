@@ -8,3 +8,4 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogShelterProject, Log, All);
 
 #define CUSTOM_DEPTH_RED 250
+#define CUSTOM_DEPTH_BLUE 251
